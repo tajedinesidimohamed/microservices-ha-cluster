@@ -1,0 +1,52 @@
+# Service d'authentification fictif
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth
+  labels:
+    app: auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: auth
+          # Image construite localement puis chargée avec "kind load docker-image"
+          image: microservices-ha-cluster/auth:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits: { cpu: 250m, memory: 128Mi }
+          # Readiness : le pod reçoit du trafic seulement s'il répond sur /health
+          readinessProbe:
+            httpGet: { path: /health, port: 8000 }
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          # Liveness : le pod est redémarré s'il ne répond plus
+          livenessProbe:
+            httpGet: { path: /health, port: 8000 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+# Service : adresse stable qui répartit le trafic entre les pods prêts
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth
+spec:
+  selector:
+    app: auth
+  ports:
+    - port: 8000
+      targetPort: 8000

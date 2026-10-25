@@ -1,0 +1,17 @@
+# Cluster local kind à un nœud, prêt pour l'Ingress NGINX.
+# Ports hôte 8080/8443 pour ne pas entrer en conflit avec docker compose (80/443).
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: ha-cluster
+nodes:
+  - role: control-plane
+    image: kindest/node:v1.31.2
+    labels:
+      ingress-ready: "true"
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 8080
+        protocol: TCP
+      - containerPort: 443
+        hostPort: 8443
+        protocol: TCP
