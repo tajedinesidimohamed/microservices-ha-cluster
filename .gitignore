@@ -1,0 +1,19 @@
+# Certificats et clés TLS (générés localement, jamais versionnés)
+certs/
+*.pem
+*.key
+*.crt
+
+# Logs Nginx (on garde seulement le dossier)
+logs/*
+!logs/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Éditeur / OS
+.vscode/
+.DS_Store
+Thumbs.db
